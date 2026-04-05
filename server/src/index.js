@@ -1,10 +1,25 @@
 import express from "express";
 import dotenv from "dotenv";
+import job from "./config/cron.js";
 dotenv.config();
+import connDB from "./config/dbConnect.js";
+import authRouter from "./routes/authRoutes.js";
 
+connDB();
 const app = express();
 
 app.use(express.json());
+
+job.start();
+
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is healthy",
+  });
+});
+
+app.use("/api/v1", authRouter);
 
 const PORT = process.env.PORT || 5000;
 
