@@ -13,7 +13,7 @@ import authorizeRoles from "../middlewares/roleMiddleware.js";
 
 const recordRouter = express.Router();
 
-recordRouter.get("/records", verifyJwt, getRecords);
+recordRouter.get("/records", verifyJwt, authorizeRoles("admin", "analyst"), getRecords);
 
 recordRouter.post("/records", verifyJwt, authorizeRoles("admin"), createRecord);
 

@@ -1,157 +1,110 @@
 import User from "../models/User.js";
-import bcrypt from "bcrypt";
-import validator from "validator";
-import jwt from "jsonwebtoken";
+import { logActivity } from "../services/activity.service.js";
 
-const RegisterUser = async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username) {
-    return res.status(400).json({
-      success: false,
-      message: "Username is required",
-    });
-  }
-
-  if (!email) {
-    return res.status(400).json({
-      success: false,
-      message: "Email is required",
-    });
-  }
-
-  if (!password) {
-    return res.status(400).json({
-      success: false,
-      message: "Password is required",
-    });
-  }
-
+const fetchAllUsers = async (req, res) => {
   try {
-    const isUserAlreadyExistsWithUsername = await User.findOne({ username });
-    if (isUserAlreadyExistsWithUsername) {
-      return res.status(409).json({
+    const activeUsers = await User.find(
+      { role: { $ne: "admin" }, status: "active" },
+      "-password",
+    );
+    const inactiveUsers = await User.find(
+      { role: { $ne: "admin" }, status: "inactive" },
+      "-password",
+    );
+    if (activeUsers.length === 0 && inactiveUsers.length === 0) {
+      return res.status(404).json({
         success: false,
-        message: `User with username ${username} already exists`,
+        message: "No users found",
+        users: { activeUsers: [], inactiveUsers: [] },
       });
     }
-
-    const isUserAlreadyExistsWithEmail = await User.findOne({ email });
-    if (isUserAlreadyExistsWithEmail) {
-      return res.status(409).json({
-        success: false,
-        message: `User with email ${email} already exists`,
-      });
-    }
-
-    if (
-      !validator.isStrongPassword(password, {
-        minLength: 6,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-        minSymbols: 1,
-      })
-    ) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        message:
-          "Password must be at least 6 characters long and contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character.",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      role: "viewer",
-      status: "active",
-    });
-    await newUser.save();
-    res.status(201).json({
+    res.status(200).json({
       success: true,
-      message: "User registered successfully",
-      data: newUser,
+      message: "Users fetched successfully",
+      users: {
+        activeUsers,
+        inactiveUsers,
+      },
     });
   } catch (error) {
-    if (error.name === "ValidationError") {
-      const errors = Object.values(error.errors).map((err) => ({
-        field: err.path,
-        message: err.message,
-      }));
-
-      return res.status(400).json({
-        success: false,
-        message: error._message,
-        errors,
-      });
-    }
-
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "failed to fetch users",
+      error: error.message,
     });
   }
 };
 
-const LoginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      message: "Email and password are required",
-    });
-  }
+const updateUserRole = async (req, res) => {
+  const { id } = req.params;
+  const { role } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true });
+
+    await logActivity({
+      action: "ROLE_UPDATE",
+      entityType: "USER",
+      entityId: user._id,
+      user: req.user._id,
+      message: `Changed role of ${user.username} to ${user.role}`,
+    });
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: "Invalid email or password",
+        message: "User not found",
       });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password",
-      });
-    }
-
-    const token = jwt.sign(
-      {
-        _id: user._id,
-        role: user.role,
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
-      message: "Login successful",
-      token,
-      data: {
-        id: user._id,
-        email: user.email,
-        role: user.role,
-      },
+      message: "User role updated successfully",
+      data: user,
     });
-
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: "Internal server error",
+      message: "Failed to update user role",
+      error: error.message,
     });
   }
 };
 
-export { RegisterUser, LoginUser };
+const updateUserStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const user = await User.findByIdAndUpdate(id, { status }, { new: true });
+
+    await logActivity({
+      action: "STATUS_UPDATE",
+      entityType: "USER",
+      entityId: user._id,
+      user: req.user._id,
+      message: `Status of ${user.username} changed to ${user.status}`,
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User status updated successfully",
+      data: user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update user status",
+      error: error.message,
+    });
+  }
+};
+
+export { fetchAllUsers, updateUserRole, updateUserStatus };

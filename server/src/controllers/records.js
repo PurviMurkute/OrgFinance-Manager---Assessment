@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Record from "../models/Record.js";
+import { logActivity } from "../services/activity.service.js";
 
 const getRecords = async (req, res) => {
   try {
@@ -53,6 +54,14 @@ const createRecord = async (req, res) => {
       createdBy: req.user._id,
     });
     await newRecord.save();
+
+    await logActivity({
+      action: "CREATE",
+      entityType: "RECORD",
+      entityId: newRecord._id,
+      user: req.user._id,
+      message: `Added ${newRecord.category} as ${newRecord.type} with amount ${newRecord.amount}`,
+    });
     res.status(201).json({
       success: true,
       data: newRecord,
@@ -91,6 +100,14 @@ const updateRecord = async (req, res) => {
       { amount, category, type, description },
       { new: true },
     );
+
+    await logActivity({
+      action: "UPDATE",
+      entityType: "RECORD",
+      entityId: record._id,
+      user: req.user._id,
+      message: `Updated ${record.category} ${record.type}`,
+    });
     res.status(200).json({
       success: true,
       data: updatedRecord,
@@ -125,6 +142,14 @@ const softDelete = async (req, res) => {
       },
       { new: true },
     );
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "RECORD",
+      entityId: record._id,
+      user: req.user._id,
+      message: `Moved to trash ${record.category} ${record.type}`,
+    });
 
     if (!record) {
       return res.status(404).json({
@@ -203,6 +228,14 @@ const restoreRecord = async (req, res) => {
     (record.deletedBy = null)),
       await record.save());
 
+    await logActivity({
+      action: "RESTORE",
+      entityType: "RECORD",
+      entityId: record._id,
+      user: req.user._id,
+      message: `Restored ${record.category} ${record.type}`,
+    });
+
     return res.status(200).json({
       success: true,
       data: record,
@@ -236,6 +269,14 @@ const deleteRecord = async (req, res) => {
       });
     }
     await Record.deleteOne({ _id: id });
+
+    await logActivity({
+      action: "DELETE",
+      entityType: "RECORD",
+      entityId: record._id,
+      user: req.user._id,
+      message: `Deleted permenantly ${record.category} ${record.type}`,
+    });
     res.status(200).json({
       success: true,
       message: "Record deleted successfully",

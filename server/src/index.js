@@ -5,6 +5,8 @@ dotenv.config();
 import connDB from "./config/dbConnect.js";
 import authRouter from "./routes/authRoutes.js";
 import recordRouter from "./routes/recordRoutes.js";
+import dashboardRouter from "./routes/dashboardRoutes.js";
+import userRouter from "./routes/userRoutes.js";
 
 connDB();
 const app = express();
@@ -22,6 +24,8 @@ app.get("/health", (req, res) => {
 
 app.use("/api/v1", authRouter);
 app.use("/api/v1", recordRouter);
+app.use("/api/v1", dashboardRouter);
+app.use("/api/v1", userRouter);
 
 const PORT = process.env.PORT || 5000;
 
