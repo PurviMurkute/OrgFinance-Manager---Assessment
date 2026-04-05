@@ -4,6 +4,7 @@ import job from "./config/cron.js";
 dotenv.config();
 import connDB from "./config/dbConnect.js";
 import authRouter from "./routes/authRoutes.js";
+import recordRouter from "./routes/recordRoutes.js";
 
 connDB();
 const app = express();
@@ -20,6 +21,7 @@ app.get("/health", (req, res) => {
 });
 
 app.use("/api/v1", authRouter);
+app.use("/api/v1", recordRouter);
 
 const PORT = process.env.PORT || 5000;
 
