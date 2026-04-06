@@ -7,7 +7,7 @@ A robust backend system to manage organizational financial records with **role-b
 ## 🌐 Live API
 
 ```
-https://expensetracker-server-ykfd.onrender.com
+https://org-finance-manager-api-backend.onrender.com
 ```
 
 ---
@@ -199,7 +199,8 @@ Authorization: Bearer <your_token>
 Swagger Docs:
 
 ```
-https://expensetracker-server-ykfd.onrender.com/api-docs
+https://org-finance-manager-api-backend.onrender.com/api-docs
+
 ```
 
 ---
