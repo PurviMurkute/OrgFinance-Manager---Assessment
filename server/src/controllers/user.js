@@ -102,27 +102,71 @@ const updateUserStatus = async (req, res) => {
   const { status } = req.body;
 
   try {
-    const user = await User.findByIdAndUpdate(id, { status }, { new: true });
+    const allowedStatus = ["active", "inactive"];
+    if (!allowedStatus.includes(status.toLowerCase())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status value",
+      });
+    }
 
-    await logActivity({
-      action: "STATUS_UPDATE",
-      entityType: "USER",
-      entityId: user._id,
-      user: req.user._id,
-      message: `Status of ${user.username} changed to ${user.status}`,
-    });
+    const userToUpdate = await User.findById(id);
 
-    if (!user) {
+    if (!userToUpdate) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
 
+    if (req.user._id.toString() === id) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot change your own status",
+      });
+    }
+
+    const activeAdmins = await User.countDocuments({
+      role: "admin",
+      status: "active",
+    });
+
+    if (
+      userToUpdate.role === "admin" &&
+      status === "inactive" &&
+      activeAdmins === 1
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Cannot deactivate the last active admin",
+      });
+    }
+
+    if (
+      userToUpdate.role === "admin" &&
+      status === "inactive"
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "Admins cannot deactivate other admins",
+      });
+    }
+
+    userToUpdate.status = status;
+    await userToUpdate.save();
+
+    await logActivity({
+      action: "STATUS_UPDATE",
+      entityType: "USER",
+      entityId: userToUpdate._id,
+      user: req.user._id,
+      message: `Status of ${userToUpdate.username} changed to ${userToUpdate.status}`,
+    });
+
     res.status(200).json({
       success: true,
       message: "User status updated successfully",
-      data: user,
+      data: userToUpdate,
     });
   } catch (error) {
     return res.status(500).json({
