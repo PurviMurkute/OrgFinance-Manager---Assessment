@@ -1,12 +1,10 @@
 # 🚀 Org Finance Manager API
 
-A backend system to manage organizational financial records with role-based access control. Built using **Node.js, Express, MongoDB**, and includes authentication, filtering, search, and dashboard analytics.
+A robust backend system to manage organizational financial records with **role-based access control (RBAC)**. Built using **Node.js, Express, and MongoDB**, this API supports secure authentication, record management, analytics, and activity tracking.
 
 ---
 
 ## 🌐 Live API
-
-Base URL:
 
 ```
 https://expensetracker-server-ykfd.onrender.com
@@ -35,14 +33,14 @@ https://expensetracker-server-ykfd.onrender.com
 
 ## 🧠 Features
 
-* Role-based access (Admin, User, Analyst)
-* JWT Authentication
-* Financial record management
-* Search & filtering
-* Dashboard analytics
-* Activity logging
-* Soft delete & restore
-* Cron job support
+* 🔐 JWT-based Authentication
+* 👥 Role-based Access Control (Admin, User, Analyst)
+* 💰 Financial Record Management (CRUD)
+* 🔍 Search & Filtering
+* 📊 Dashboard Analytics (date-wise insights)
+* 🗑️ Soft Delete & Restore
+* 📜 Activity Logging
+* ⏱️ Cron Job Integration
 
 ---
 
@@ -52,7 +50,7 @@ https://expensetracker-server-ykfd.onrender.com
 * Express.js
 * MongoDB + Mongoose
 * JWT Authentication
-* Swagger (API Docs)
+* Swagger (API Documentation)
 
 ---
 
@@ -62,13 +60,13 @@ https://expensetracker-server-ykfd.onrender.com
 
 ### 🔐 AUTH ROUTES
 
-#### Register User/Admin/Analyst
+#### Register User (Default Role: User)
 
 ```
 POST /api/v1/auth/register
 ```
 
-#### Login User/Admin/Analyst
+#### Login
 
 ```
 POST /api/v1/auth/login
@@ -76,21 +74,21 @@ POST /api/v1/auth/login
 
 ---
 
-### 👤 USER ROUTES
+### 👤 USER ROUTES (Admin Only)
 
-#### Get All Users (Admin)
+#### Get All Users
 
 ```
 GET /api/v1/users
 ```
 
-#### Update User Role (Admin)
+#### Update User Role
 
 ```
 PATCH /api/v1/users/:id/role
 ```
 
-#### Update User Status (Admin)
+#### Update User Status (Active/Inactive)
 
 ```
 PATCH /api/v1/users/:id/status
@@ -100,13 +98,13 @@ PATCH /api/v1/users/:id/status
 
 ### 💰 RECORD ROUTES
 
-#### Get All Records (Admin/Analyst)
+#### Get All Records (Admin, Analyst)
 
 ```
 GET /api/v1/records
 ```
 
-#### Get Records with Pagination (Admin/Analyst)
+#### Get Records with Pagination
 
 ```
 GET /api/v1/records?page=1&limit=3
@@ -124,13 +122,13 @@ POST /api/v1/records
 PUT /api/v1/records/:id
 ```
 
-#### Delete Record (Soft Delete) (Admin)
+#### Soft Delete Record (Admin)
 
 ```
 PATCH /api/v1/records/:id/soft-delete
 ```
 
-#### Get Soft Deleted Records (Admin)
+#### Get Deleted Records (Admin)
 
 ```
 GET /api/v1/records/trash
@@ -146,16 +144,16 @@ PATCH /api/v1/records/:id/restore
 
 ### 🔍 SEARCH & FILTER
 
-#### Search Records (Admin/Analyst)
+#### Search Records
 
 ```
 GET /api/v1/records/search?query=shopping
 ```
 
-#### Filter Records (Admin/Analyst)
+#### Filter Records
 
 ```
-GET /api/v1/records/filter?category=rent&type=expense&date=2024-04-5
+GET /api/v1/records/filter?category=rent&type=expense&date=2024-04-05
 ```
 
 ---
@@ -168,7 +166,7 @@ GET /api/v1/records/filter?category=rent&type=expense&date=2024-04-5
 GET /api/v1/dashboard/summary
 ```
 
-#### Get Monthly Summary
+#### Get Summary by Date Range
 
 ```
 GET /api/v1/dashboard/summary?startdate=2026-04-01&enddate=2026-04-30
@@ -186,13 +184,13 @@ GET /health
 
 ## 🔑 Authentication
 
-All the routes require a JWT token.
-
-Add token in header:
+Protected routes require a JWT token:
 
 ```
 Authorization: Bearer <your_token>
 ```
+
+> ⚠️ Note: Auth routes (register/login) do not require a token.
 
 ---
 
@@ -201,13 +199,7 @@ Authorization: Bearer <your_token>
 Swagger Docs:
 
 ```
-http://localhost:5000/api-docs
-```
-
-(After deployment)
-
-```
-https://your-app.onrender.com/api-docs
+https://expensetracker-server-ykfd.onrender.com/api-docs
 ```
 
 ---
@@ -245,12 +237,13 @@ npm run dev
 
 ---
 
-## 📌 Notes
+## 🔒 Security & Best Practices
 
-* Only Admin can create/update/delete records
-* Users can view records
-* Analyst can view analytics
-* Prevent self-role and last-admin changes (handled in backend)
+* Role cannot be assigned during registration
+* Prevented self-role modification
+* Prevented last admin role/status change
+* Soft delete used instead of permanent deletion
+* Input validation and error handling implemented
 
 ---
 

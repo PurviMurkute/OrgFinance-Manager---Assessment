@@ -10,6 +10,9 @@ const options = {
     },
     servers: [
       {
+        url: "https://expensetracker-server-ykfd.onrender.com",
+      },
+      {
         url: process.env.SERVER_URL || "http://localhost:3000",
       },
     ],
