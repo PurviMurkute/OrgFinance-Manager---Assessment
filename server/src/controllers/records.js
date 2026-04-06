@@ -4,13 +4,24 @@ import { logActivity } from "../services/activity.service.js";
 
 const getRecords = async (req, res) => {
   try {
-    const records = await Record.find({ isDeleted: false }).populate(
-      "createdBy",
-      "username email",
-    );
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+
+    const skip = (page - 1) * limit;
+
+    const total = await Record.countDocuments({ isDeleted: false });
+
+    const records = await Record.find({ isDeleted: false })
+      .populate("createdBy", "username email")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).json({
       success: true,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalRecords: total,
       data: records,
       message: "Records fetched successfully",
     });
@@ -19,6 +30,121 @@ const getRecords = async (req, res) => {
       success: false,
       message: "Failed to fetch records",
       error: error.message,
+    });
+  }
+};
+
+const filterRecords = async (req, res) => {
+  try {
+    const { category, type, date, page = 1, limit = 5 } = req.query;
+
+    let query = { isDeleted: false };
+
+    if (category) {
+      query.category = category;
+    }
+
+    if (type) {
+      query.type = type.toLowerCase();
+    }
+
+    if (date) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+
+      query.date = { $gte: start, $lte: end };
+    }
+
+    const skip = (page - 1) * limit;
+
+    const total = await Record.countDocuments(query);
+
+    const records = await Record.find(query)
+      .populate("createdBy", "username email")
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    if (records.length === 0) {
+      return res.status(404).json({
+        success: false,
+        currentPage: Number(page),
+        totalPages: 0,
+        totalRecords: 0,
+        data: [],
+        message: `No records found`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / limit),
+      totalRecords: total,
+      data: records,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const searchRecords = async (req, res) => {
+  try {
+    const { query, page = 1, limit = 5 } = req.query;
+
+    let searchQuery = { isDeleted: false };
+
+    if (query) {
+      const numericValue = Number(query);
+
+      searchQuery.$or = [
+        { type: { $regex: query, $options: "i" } },
+        { category: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" } },
+
+        ...(isNaN(numericValue) ? [] : [{ amount: numericValue }]),
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+
+    const total = await Record.countDocuments(searchQuery);
+
+    const records = await Record.find(searchQuery)
+      .populate("createdBy", "username email")
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(Number(limit));
+
+    if (records.length === 0) {
+      return res.status(404).json({
+        success: false,
+        currentPage: Number(page),
+        totalPages: 0,
+        totalRecords: 0,
+        data: [],
+        message: `No records found for the search ${query}`,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      currentPage: Number(page),
+      totalPages: Math.ceil(total / limit),
+      totalRecords: total,
+      data: records,
+      message: "Search results fetched successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
     });
   }
 };
@@ -292,6 +418,8 @@ const deleteRecord = async (req, res) => {
 
 export {
   getRecords,
+  filterRecords,
+  searchRecords,
   createRecord,
   updateRecord,
   softDelete,

@@ -1,6 +1,6 @@
 import RecentActivity from "../models/RecentActivity.js";
 import Record from "../models/Record.js";
-import buildFilter from "../utils/recordFilters.js";
+import buildFilter from "../utils/dashboardSummaryFilters.js";
 
 const getSummaryService = async (filters) => {
   const matchStage = buildFilter(filters);

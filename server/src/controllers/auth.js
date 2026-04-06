@@ -135,6 +135,13 @@ const LoginUser = async (req, res) => {
       { expiresIn: "7d" },
     );
 
+    if (user.status === "inactive") {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is inactive. Please contact admin.",
+      });
+    }
+
     return res.status(200).json({
       success: true,
       message: "Login successful",

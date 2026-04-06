@@ -2,9 +2,11 @@ import express from "express";
 import {
   createRecord,
   deleteRecord,
+  filterRecords,
   getRecords,
   getTempDeletedRecords,
   restoreRecord,
+  searchRecords,
   softDelete,
   updateRecord,
 } from "../controllers/records.js";
@@ -13,7 +15,25 @@ import authorizeRoles from "../middlewares/roleMiddleware.js";
 
 const recordRouter = express.Router();
 
-recordRouter.get("/records", verifyJwt, authorizeRoles("admin", "analyst"), getRecords);
+recordRouter.get(
+  "/records",
+  verifyJwt,
+  authorizeRoles("admin", "analyst"),
+  getRecords,
+);
+
+recordRouter.get(
+  "/records/search",
+  verifyJwt,
+  authorizeRoles("admin", "analyst"),
+  searchRecords,
+);
+recordRouter.get(
+  "/records/filter",
+  verifyJwt,
+  authorizeRoles("admin", "analyst"),
+  filterRecords,
+);
 
 recordRouter.post("/records", verifyJwt, authorizeRoles("admin"), createRecord);
 

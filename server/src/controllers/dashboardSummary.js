@@ -19,6 +19,12 @@ export const getSummary = async (req, res) => {
       recentActivities,
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res
+      .status(500)
+      .json({
+        success: false,
+        message: "failed to fetch dashboard summary.",
+        error: error.message,
+      });
   }
 };
