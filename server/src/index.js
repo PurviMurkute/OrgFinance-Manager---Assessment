@@ -7,6 +7,8 @@ import authRouter from "./routes/authRoutes.js";
 import recordRouter from "./routes/recordRoutes.js";
 import dashboardRouter from "./routes/dashboardRoutes.js";
 import userRouter from "./routes/userRoutes.js";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./config/swagger.js";
 
 connDB();
 const app = express();
@@ -26,6 +28,13 @@ app.use("/api/v1", authRouter);
 app.use("/api/v1", recordRouter);
 app.use("/api/v1", dashboardRouter);
 app.use("/api/v1", userRouter);
+// expose raw OpenAPI JSON so it can be downloaded/shared easily
+app.get("/api-docs.json", (req, res) => {
+  res.setHeader("Content-Type", "application/json");
+  res.json(swaggerSpec);
+});
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = process.env.PORT || 5000;
 
