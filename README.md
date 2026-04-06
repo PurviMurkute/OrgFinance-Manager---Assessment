@@ -16,41 +16,41 @@ https://org-finance-manager-api-backend.onrender.com
 
 ### 👑 Admin
 
-* Email: `admin1@gmail.com`
-* Password: `Admin@1`
+- Email: `admin1@gmail.com`
+- Password: `Admin@1`
 
 ### 👤 User
 
-* Email: `user1@gmail.com`
-* Password: `User@1`
+- Email: `user1@gmail.com`
+- Password: `User@1`
 
 ### 📊 Analyst
 
-* Email: `analyst1@gmail.com`
-* Password: `Analyst@1`
+- Email: `analyst1@gmail.com`
+- Password: `Analyst@1`
 
 ---
 
 ## 🧠 Features
 
-* 🔐 JWT-based Authentication
-* 👥 Role-based Access Control (Admin, User, Analyst)
-* 💰 Financial Record Management (CRUD)
-* 🔍 Search & Filtering
-* 📊 Dashboard Analytics (date-wise insights)
-* 🗑️ Soft Delete & Restore
-* 📜 Activity Logging
-* ⏱️ Cron Job Integration
+- 🔐 JWT-based Authentication
+- 👥 Role-based Access Control (Admin, User, Analyst)
+- 💰 Financial Record Management (CRUD)
+- 🔍 Search & Filtering
+- 📊 Dashboard Analytics (date-wise insights)
+- 🗑️ Soft Delete & Restore
+- 📜 Activity Logging
+- ⏱️ Cron Job Integration
 
 ---
 
 ## ⚙️ Tech Stack
 
-* Node.js
-* Express.js
-* MongoDB + Mongoose
-* JWT Authentication
-* Swagger (API Documentation)
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- JWT Authentication
+- Swagger (API Documentation)
 
 ---
 
@@ -240,17 +240,21 @@ npm run dev
 
 ## 🔒 Security & Best Practices
 
-* Role cannot be assigned during registration
-* Prevented self-role modification
-* Prevented last admin role/status change
-* Soft delete used instead of permanent deletion
-* Input validation and error handling implemented
+- Role cannot be assigned during registration
+- Prevented self-role modification
+- Prevented last admin role/status change
+- Soft delete used instead of permanent deletion
+- Input validation and error handling implemented
 
 ---
 
-## 👩‍💻 Author
+## 👩‍💻 Author & Contact
 
 **Purvi Murkute**
+
+- 📧 Email: `purvimurkute51@gmail.com`
+- 🔗 Portfolio: [purvimurkute.in](https://purvimurkute.in/)
+- 💼 GitHub: [PurviMurkute](https://github.com/PurviMurkute)
 
 ---
 
